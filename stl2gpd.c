@@ -6,13 +6,13 @@ FILE *fp_out;
 
 long expand_state(unsigned state, long until_count)
 {
-	unsigned gpd = (until_count<<8) | state;
+	unsigned gpd = (until_count<<8) | (state&0x0ff);
 	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
 	return until_count;
 }
 
 #define NSTATE 1
-#define MAXSTATE	6	/* 6 x DIO432 is max payload */
+#define MAXSTATE 128	/* hardware limit */
 
 int main(int argc, char* argv[])
 {
@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
 	long abs_count = 0;
 	FILE *fp_log = 0;
 	int nstate = 0;
-	int nstate0 = 0;
 	int nl = 0;
+	int state_count = 0;
 
 	if (argc > 1){
 		fp_out = fopen(argv[1], "w");
@@ -50,15 +50,9 @@ int main(int argc, char* argv[])
 			delta_times = 1;	/* better make them all delta */
 		}
 		if ((nstate = sscanf(pline, "%u,%x", &count, &state) - 1) >= 1){
-			if (nstate0){
-				if (nstate != nstate0){
-					fprintf(stderr, "ERROR: line:%d state count change %d=>%d."
-							"Please apply state columns consistently\n",
-							nl, nstate0, nstate);
-					return -1;
-				}
-			}else{
-				nstate0 = nstate;
+			if (++state_count >= MAXSTATE){
+				fprintf(stderr, "WARNING: state count limit %u exceeded\n", MAXSTATE);
+				break;
 			}
 			abs_count = expand_state(
 				state,
