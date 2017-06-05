@@ -5,10 +5,38 @@
 
 FILE *fp_out;
 
+#define MAXCOUNT 0x00ffffff
+
+void write_gpd(unsigned count, unsigned state)
+{
+	unsigned gpd = (count<<8) | (state&0x0ff);
+
+	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
+}
+
 long expand_state(unsigned state, long until_count)
 {
-	unsigned gpd = (until_count<<8) | (state&0x0ff);
-	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
+	static unsigned count0;
+
+	if (until_count < MAXCOUNT){
+		write_gpd(until_count, state);
+	}else{
+		unsigned remain = until_count - count0;
+		if (MAXCOUNT-count0 > remain){
+			write_gpd(count0+remain, state);
+		}else{
+			write_gpd(MAXCOUNT-count0, state);
+			remain -= MAXCOUNT-count0;
+			
+			while(remain > MAXCOUNT){
+				write_gpd(0, state);
+				remain -= MAXCOUNT;
+			}
+			write_gpd(remain, state);
+		}
+	}
+
+	count0 = until_count;
 	return until_count;
 }
 
