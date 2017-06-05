@@ -1,4 +1,8 @@
-all: bin/stl2gpg
+all: 
+	echo Hello
+
+clean:
+	rm bin/stl2gpg stl2gpg.x86
 
 bin/stl2gpg: stl2gpg.c
 	${CC} stl2gpg.c -o bin/stl2gpg

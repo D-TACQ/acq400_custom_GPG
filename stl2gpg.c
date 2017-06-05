@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
 
@@ -14,6 +15,8 @@ long expand_state(unsigned state, long until_count)
 #define NSTATE 1
 #define MAXSTATE 128	/* hardware limit */
 
+int FINAL = 10;		/* final state length */
+
 int main(int argc, char* argv[])
 {
 	char aline[128];
@@ -23,6 +26,9 @@ int main(int argc, char* argv[])
 	int nstate = 0;
 	int nl = 0;
 	int state_count = 0;
+	unsigned state0 = 0;
+
+	if (getenv("FINAL")) FINAL = atoi(getenv("FINAL"));
 
 	if (argc > 1){
 		fp_out = fopen(argv[1], "w");
@@ -50,21 +56,20 @@ int main(int argc, char* argv[])
 			delta_times = 1;	/* better make them all delta */
 		}
 		if ((nstate = sscanf(pline, "%u,%x", &count, &state) - 1) >= 1){
-			if (++state_count >= MAXSTATE){
+			if (++state_count >= MAXSTATE-1){
 				fprintf(stderr, "WARNING: state count limit %u exceeded\n", MAXSTATE);
 				break;
 			}
-			if (state_count == 1 && count > 0){
-				abs_count = expand_state(0, 
-					delta_times? abs_count+count-1: count - 1);
-				state_count += 1;
-			}
-			abs_count = expand_state(
-				state,
+			abs_count = expand_state(state0, 
 				delta_times? abs_count+count: count);
+			state_count += 1;
+			state0 = state;
 		}else{
 			fprintf(stderr, "scan failed\n");
 			return -1;
 		}
 	}
+	abs_count = expand_state(state0, 
+                                delta_times? abs_count+FINAL: abs_count+FINAL);
+	
 }
