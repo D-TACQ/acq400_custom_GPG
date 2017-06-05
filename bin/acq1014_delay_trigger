@@ -10,7 +10,6 @@ stl2gpg /dev/acq400.0.gpg <<EOF
 $1,8
 EOF
 set.site 0 gpg_trg=1,$2,1
-set.site 0 gpg_clk=0,0,0
 #set.site 0 GPG:MODE LOOPWAIT
 set.site 0 gpg_mode 3
 set.site 0 SIG:SRC:TRG:0 EXT
@@ -28,7 +27,8 @@ CLK=d*)
 	load_gpg $2 7
 	set.site 0 gpg_clk=1,$clkd,1;;
 *)
-	load_gpg $1 7;;
+	load_gpg $1 7
+	set.site 0 gpg_clk=0,0,0;;
 esac
 
 #	echo set.site 0 gpg_clk=1,$clkd,1
