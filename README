@@ -1,0 +1,25 @@
+stl2gpg : load Gate Pulse Generator from State Transition List
+
+
+NB: STL format:
+count,state   : at count, set state
+
+BUT GPG format is
+count,state   : set state until count
+
+stl2gpg makes this transition by creating a first state entry to fill with zero's up until 
+the first state.
+
+
+test:
+[pgm@hoy4 CUSTOM_GPG]$ ./stl2gpg.x86 | hexdump -ve '1/4 "%08x\n"'
+13,1
+14,2
+15,3
+16,0
+00000c00
+00000d01
+00000e02
+00000f03
+00001000
+
