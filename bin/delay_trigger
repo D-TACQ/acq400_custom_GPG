@@ -1,0 +1,31 @@
+#!/bin/sh
+# delay_trigger usec or
+# delay_trigger CLK=clksrc nclocks
+# eg delay_trigger 1000000
+# eg delay_trigger CLK=0 1000000
+
+
+load_gpg() {
+stl2gpg /dev/acq400.0.gpg <<EOF
+$1,8
+EOF
+set.site 0 gpg_trg=1,$2,1
+set.site 0 gpg_clk=0,0,0
+#set.site 0 GPG:MODE LOOPWAIT
+set.site 0 gpg_mode 3
+set.site 0 SIG:SRC:TRG:0 EXT
+set.site 0 SIG:SRC:TRG:1 GPG1
+#set.site 0 GPG:ENABLE 1
+set.site 0 gpg_enable 1
+set.site 0 SIG:SYNC_OUT:TRG GPG
+set.site 0 SIG:SYNC_OUT:TRG:DX d3
+}
+
+case $1 in
+CLK=*)
+	eval $1
+	load_gpg $2 $CLK;;
+*)
+	load_gpg $1 7;;
+esac
+
