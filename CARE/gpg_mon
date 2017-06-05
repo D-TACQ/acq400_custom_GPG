@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd /usr/local
+map acq1001.map
+while [ 1 ]; do echo . | nm $sc+48 ; sleep 0.5; done
