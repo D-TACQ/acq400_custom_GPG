@@ -54,6 +54,11 @@ int main(int argc, char* argv[])
 				fprintf(stderr, "WARNING: state count limit %u exceeded\n", MAXSTATE);
 				break;
 			}
+			if (state_count == 1 && count > 0){
+				abs_count = expand_state(0, 
+					delta_times? abs_count+count-1: count - 1);
+				state_count += 1;
+			}
 			abs_count = expand_state(
 				state,
 				delta_times? abs_count+count: count);
