@@ -25,10 +25,10 @@ case $1 in
 CLK=d*)
 	eval $1	
 	clkd=${CLK#d*}
-	echo load_gpg $2 $clkd
 	load_gpg $2 7
 	set.site 0 gpg_clk=1,$clkd,1;;
 *)
 	load_gpg $1 7;;
 esac
 
+#	echo set.site 0 gpg_clk=1,$clkd,1
