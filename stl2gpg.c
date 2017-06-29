@@ -11,6 +11,8 @@ void write_gpd(unsigned count, unsigned state)
 {
 	unsigned gpd = (count<<8) | (state&0x0ff);
 
+	fprintf(stderr, "write_gpg %8u %02x %08x\n", count, state, gpd);
+
 	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
 }
 
@@ -19,19 +21,24 @@ long expand_state(unsigned state, long until_count)
 	static unsigned count0;
 
 	if (until_count < MAXCOUNT){
+		fprintf(stderr, "expand_state() %d\n", __LINE__);
 		write_gpd(until_count, state);
 	}else{
 		unsigned remain = until_count - count0;
 		if (MAXCOUNT-count0 > remain){
+			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(count0+remain, state);
 		}else{
+			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(MAXCOUNT-count0, state);
 			remain -= MAXCOUNT-count0;
 			
 			while(remain > MAXCOUNT){
+				fprintf(stderr, "expand_state() %d\n", __LINE__);
 				write_gpd(0, state);
 				remain -= MAXCOUNT;
 			}
+			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(remain, state);
 		}
 	}
