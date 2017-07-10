@@ -22,6 +22,14 @@ config_gpg() {
 	set.site 0 GPG:ENABLE 1
 }
 
+get_model() {
+	if [ -e /tmp/MODEL ]; then
+		cat /tmp/MODEL
+	else
+		cat /etc/acq400/0/MODEL
+	fi
+}
+
 while [ "$1" != "" ]; do
 	case $1 in
 	*=*)
@@ -44,7 +52,16 @@ while [ "$1" != "" ]; do
 				load_gpg $1
 			fi
 		fi
-		config_gpg 0 $edge
+		case $(get_model) in
+		acq1014a)
+			config_gpg 7 $edge
+			set.site 0 SIG:SYNC_OUT:TRG GPG
+			set.site 0 SIG:SYNC_OUT:TRG:DX d1;;
+		acq1014)
+			config_gpg 0 $edge;;
+		*)
+			config_gpg 0 $edge;;
+		esac
 		if [ $clkd -eq -1 ]; then
 			set.site 0 gpg_clk=0,0,0
 		else
