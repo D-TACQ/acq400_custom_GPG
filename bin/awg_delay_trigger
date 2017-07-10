@@ -18,7 +18,6 @@ config_gpg() {
 	set.site 0 gpg_trg=1,$1,${2:-1}
 	set.site 0 GPG:MODE LOOPWAIT
 	set.site 0 SIG:SRC:TRG:0 EXT
-	set.site 0 SIG:SRC:TRG:1 GPG1
 	set.site 0 GPG:ENABLE 1
 }
 
