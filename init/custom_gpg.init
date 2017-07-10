@@ -13,8 +13,11 @@ cat - >/etc/inetd.gpg.conf <<EOF
 EOF
 
 # temp hack for acq1014a REMOVE ME
-ln -s /usr/local/bin/caput_($hostname):0 /etc/acq400/0/GPG:ENABLE
-ln -s /usr/local/bin/caput_($hostname):0 /etc/acq400/0/GPG:MODE
+if [ -e /tmp/MODEL ] && [ "x$(cat /tmp/MODEL)" = "acq1014a" ]; then
+	echo +++ custom_gpg knobs hack for acq1014a
+	ln -s /usr/local/bin/caput_($hostname):0 /etc/acq400/0/GPG:ENABLE
+	ln -s /usr/local/bin/caput_($hostname):0 /etc/acq400/0/GPG:MODE
+fi
 # temp hack ends
 
 inetd /etc/inetd.gpg.conf
