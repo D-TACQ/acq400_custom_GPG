@@ -1,0 +1,85 @@
+#!/bin/sh
+# delay_trigger usec or
+# delay_trigger CLK=clksrc nclocks
+# eg delay_trigger 1000000
+# eg delay_trigger CLK=0 1000000
+# multi-trigger : preload or STL=stl-file load
+
+# in all cases, d1 is the GPG output pulse we're interested in
+
+load_gpg() {
+let flattop=$1+100000
+
+stl2gpg /dev/acq400.0.gpg <<EOF
+$1,2
+$flattop,0
+EOF
+}
+
+config_gpg() {
+	set.site 0 gpg_trg=1,$1,${2:-1}
+	set.site 0 GPG:MODE LOOPWAIT
+	set.site 0 SIG:SRC:TRG:0 EXT
+	set.site 0 GPG:ENABLE 1
+}
+
+get_model() {
+	if [ -e /tmp/MODEL ]; then
+		cat /tmp/MODEL
+	else
+		cat /etc/acq400/0/MODEL
+	fi
+}
+MODEL=$(get_model)
+
+
+while [ "$1" != "" ]; do
+	case $1 in
+	*=*)
+		eval $1;;
+	disable)
+		set.site 0 GPG:ENABLE 0
+		if [ "x$MODEL" = "xacq1014a" ]; then
+			set.site 0 SIG:SYNC_OUT:TRG TRG
+			set.site 0 SIG:SYNC_OUT:TRG:DX d7
+		fi
+		exit;;
+	*)
+		clkd=${CLK#d*}
+		if [ "x$clkd" = "x" ]; then
+			clkd=int
+		fi
+		if [ "x$EDGE" = "xfalling" ]; then
+			edge=0
+		else
+			edge=1
+		fi
+		if [ "x$1" != "xpreload" ]; then
+			if [ -e $STL ]; then
+				stl2gpg /dev/acq400.0.gpg <$STL 2>/dev/null
+			else				
+				load_gpg $1
+			fi
+		fi
+		case $MODEL in
+		acq1014a)
+			config_gpg 7 $edge
+			set.site 0 SIG:SYNC_OUT:TRG GPG
+			set.site 0 SIG:SYNC_OUT:TRG:DX d1;;
+		acq1014)
+			echo TODO: route it out the biscuit.. SOFT_TRG d0 on biscuit
+			config_gpg 0 $edge;;
+		*)
+# awg from site 1.. enable GPG trigger
+			set.site 0 SIG:SRC:TRG:1 GPG1
+			config_gpg 0 $edge;;
+		esac
+		if [ "x$clkd" = "xint" ]; then
+			set.site 0 gpg_clk=0,0,0
+		else
+			set.site 0 gpg_clk=1,$clkd,1
+		fi
+		exit;;
+	esac
+	shift
+done
