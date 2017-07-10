@@ -13,4 +13,7 @@ EOF
 
 inetd /etc/inetd.gpg.conf
 
+(/usr/local/epics/scripts/wait_ioc_ready;
+	/usr/local/epics/scripts/gpg_monitor 1) &
+
 
