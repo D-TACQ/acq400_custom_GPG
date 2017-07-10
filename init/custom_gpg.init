@@ -1,5 +1,6 @@
 #!/bin/sh
 
+echo ++ custom_gpg.init
 ln -s /usr/local/bin/acq1014_delay_trigger /etc/acq400/0/
 ln -s /usr/local/bin/awg_delay_trigger /etc/acq400/0/
 
@@ -13,7 +14,8 @@ EOF
 
 inetd /etc/inetd.gpg.conf
 
-(/usr/local/bin/wait_ioc_ready;
+(/usr/local/bin/wait_ioc_ready; \
+	echo ++ custom_gpg.init enable monitor; \
 	/usr/local/epics/scripts/gpg_monitor 1) &
 
 
