@@ -1,0 +1,63 @@
+#!/usr/local/bin/expect
+#!/usr/bin/expect
+
+# example:
+# load.pulse_def 8 10 50 6400
+set IS_LIVE 1
+set VERBOSE 0
+
+set SMS		[expr int( ceil([lindex $argv 0]))]
+
+puts "SMS $SMS"
+
+set CURSOR 0
+
+# GPG entry  TIME | VALUE
+# Load the value and hold until TIME, then next
+proc ts {until_ms} {
+	global SMS
+	return [expr $until_ms*$SMS]
+}
+
+
+proc load_reg {reg value} {
+	global VERBOSE IS_LIVE
+
+	if {$VERBOSE} {
+		puts "set.site 0 $reg $value"
+	}
+	if {$IS_LIVE} {
+		exec set.site 0 $reg $value
+	}
+}	
+
+proc load_gpd {gpg delay pat} {
+        set gpd [expr ($delay << 8) | ($pat & 0x0ff)]
+        puts stderr "delay $delay pat $pat gpd [format 0x%08x $gpd]"
+        puts -nonewline $gpg [binary format n $gpd]
+        flush $gpg
+}
+
+
+load_reg gpg_enable 0
+set gpg [open "/dev/acq400.0.gpg" "w"]
+
+load_gpd $gpg [ts 100] 1
+load_gpd $gpg [ts 110] 0
+load_gpd $gpg [ts 200] 2
+load_gpd $gpg [ts 210] 0
+load_gpd $gpg [ts 300] 4
+load_gpd $gpg [ts 310] 0
+load_gpd $gpg [ts 400] 8
+load_gpd $gpg [ts 410] 0
+
+close $gpg
+
+if {[lsearch $argv noclk] < 0 } 	{ load_reg gpg_clk 1,1,0 	}
+if {[lsearch $argv nomode] < 0 } 	{ load_reg gpg_mode 0 		}
+if {[lsearch $argv nosync] < 0 } 	{ load_reg gpg_sync 0,0,0 	}
+if {[lsearch $argv notrg] < 0 }		{ load_reg gpg_trg 1,0,1 	}
+if {[lsearch $argv noenable] < 0 } 	{ load_reg gpg_enable 1		}
+
+
+

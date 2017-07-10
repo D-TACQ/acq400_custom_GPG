@@ -1,0 +1,26 @@
+#!/bin/bash
+# SOS : simple one shot
+DC=$(date +%y%m%d%H%M)
+SEQ=35
+PKG=custom_gpg
+PACKAGES=../../PACKAGES
+
+./make.zynq	
+
+rm -Rf opkg/*
+mkdir -p opkg/usr/local/bin \
+	opkg/usr/local/init \
+	opkg/usr/local/CARE
+mkdir -p release
+
+cp CARE/* opkg/usr/local/CARE
+cp bin/* opkg/usr/local/bin
+cp init/* opkg/usr/local/init
+cp README opkg/usr/local/init/$PKG-README
+
+
+tar cvzf release/${SEQ}-${PKG}-${DC}.tgz -C opkg .
+ls -l release/${SEQ}-${PKG}-${DC}.tgz
+rm -f ${PACKAGES}/${SEQ}-${PKG}*
+cp release/${SEQ}-${PKG}-${DC}.tgz ${PACKAGES}
+

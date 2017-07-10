@@ -1,0 +1,51 @@
+#!/bin/sh
+# delay_trigger usec or
+# delay_trigger CLK=clksrc nclocks
+# eg delay_trigger 1000000
+# eg delay_trigger CLK=0 1000000
+
+
+load_gpg() {
+let flattop=$1+100000
+
+stl2gpg /dev/acq400.0.gpg <<EOF
+$1,2
+$flattop,0
+EOF
+
+set.site 0 gpg_trg=1,$2,${3:-1}
+set.site 0 GPG:MODE LOOPWAIT
+set.site 0 SIG:SRC:TRG:0 EXT
+set.site 0 SIG:SRC:TRG:1 GPG1
+set.site 0 GPG:ENABLE 1
+set.site 0 SIG:SYNC_OUT:TRG GPG
+set.site 0 SIG:SYNC_OUT:TRG:DX d3
+}
+
+while [ "$1" != "" ]; do
+	case $1 in
+	*=*)
+		eval $1;;
+	*)
+		clkd=${CLK#d*}
+		if [ "$clkd" = "" ]; then
+			clkd=-1
+		fi
+		if [ "$EDGE" = "falling" ]; then
+			edge=0
+		else
+			edge=1
+		fi
+		if [ "x$STL" != "preload" ]; then
+			echo load_gpg $1 0 $edge
+			load_gpg $1 0 $edge
+		fi
+		if [ $clkd -eq -1 ]; then
+			set.site 0 gpg_clk=0,0,0
+		else
+			set.site 0 gpg_clk=1,$clkd,1
+		fi
+		exit;;
+	esac
+	shift
+done
