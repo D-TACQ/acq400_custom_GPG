@@ -13,7 +13,7 @@ mkdir -p opkg/usr/local/bin \
 	opkg/usr/local/CARE
 mkdir -p release
 
-cp CARE/* opkg/usr/local/CARE
+cp -r CARE/* opkg/usr/local/CARE
 cp bin/* opkg/usr/local/bin
 cp init/* opkg/usr/local/init
 cp README opkg/usr/local/init/$PKG-README
