@@ -14,7 +14,10 @@ EOF
 
 inetd /etc/inetd.gpg.conf
 
-(/usr/local/bin/wait_ioc_ready; \
+echo ++ custom_gpg.init go underground
+(echo ++ custom_gpg.init background wait ioc_ready; \
+	sleep 5; echo ++ custom_gpg.init back from initial sleep; \
+	/usr/local/bin/wait_ioc_ready; \
 	echo ++ custom_gpg.init enable monitor; \
 	/usr/local/epics/scripts/gpg_monitor 1) &
 
