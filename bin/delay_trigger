@@ -3,7 +3,9 @@
 # delay_trigger CLK=clksrc nclocks
 # eg delay_trigger 1000000
 # eg delay_trigger CLK=0 1000000
-# multi-trigger : preload or STL=stl-file load
+# multi-trigger : 
+# delay_trigger preload or 
+# delay_trigger STL=stl-file load
 
 # in all cases, d1 is the GPG output pulse we're interested in
 
@@ -55,7 +57,7 @@ while [ "$1" != "" ]; do
 			edge=1
 		fi
 		if [ "x$1" != "xpreload" ]; then
-			if [ -e $STL ]; then
+			if [ "x$STL" != "x" ] && [ -e $STL ]; then
 				stl2gpg /dev/acq400.0.gpg <$STL 2>/dev/null
 			else				
 				load_gpg $1
