@@ -25,17 +25,18 @@ long expand_state(unsigned state, long until_count)
 		write_gpd(until_count, state);
 	}else{
 		unsigned remain = until_count - count0;
-		if (MAXCOUNT-count0 > remain){
+		unsigned ontheclock = count0&MAXCOUNT;		/* what's already on the clock */
+		if (MAXCOUNT-ontheclock > remain){
 			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(count0+remain, state);
 		}else{
 			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(MAXCOUNT, state);
-			remain -= MAXCOUNT-count0;
+			remain -= MAXCOUNT-ontheclock;
 			
 			while(remain > MAXCOUNT){
 				fprintf(stderr, "expand_state() %d\n", __LINE__);
-				write_gpd(0, state);
+				write_gpd(MAXCOUNT, state);
 				remain -= MAXCOUNT;
 			}
 			fprintf(stderr, "expand_state() %d\n", __LINE__);

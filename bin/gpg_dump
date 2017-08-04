@@ -5,6 +5,6 @@ if [ "x$DEV" = "x-" ]; then
 	DEV=
 fi
 
-hexdump -e '1/4 "%d\n"' $DEV | 
+hexdump -ve '1/4 "%d\n"' $DEV | 
 awk '{count=and(rshift($1,8),0x00ffffff);state=and($1,255); printf("%8u %02x\n", count, state)}'
 
