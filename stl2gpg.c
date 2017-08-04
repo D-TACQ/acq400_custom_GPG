@@ -30,7 +30,7 @@ long expand_state(unsigned state, long until_count)
 			write_gpd(count0+remain, state);
 		}else{
 			fprintf(stderr, "expand_state() %d\n", __LINE__);
-			write_gpd(MAXCOUNT-count0, state);
+			write_gpd(MAXCOUNT, state);
 			remain -= MAXCOUNT-count0;
 			
 			while(remain > MAXCOUNT){
