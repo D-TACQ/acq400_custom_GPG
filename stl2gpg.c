@@ -32,12 +32,12 @@ long expand_state(unsigned state, long until_count)
 		}else{
 			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(MAXCOUNT, state);
-			remain -= MAXCOUNT-ontheclock;
+			remain -= (MAXCOUNT+1)-ontheclock;
 			
 			while(remain > MAXCOUNT){
 				fprintf(stderr, "expand_state() %d\n", __LINE__);
 				write_gpd(MAXCOUNT, state);
-				remain -= MAXCOUNT;
+				remain -= MAXCOUNT+1;
 			}
 			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(remain, state);
