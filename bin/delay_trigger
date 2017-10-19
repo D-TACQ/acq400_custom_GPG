@@ -39,7 +39,7 @@ while [ "$1" != "" ]; do
 	case $1 in
 	*=*)
 		eval $1;;
-	disable)
+	0|disable)
 		set.site 0 GPG:ENABLE 0
 		case $MODEL in
 		acq1014a)
