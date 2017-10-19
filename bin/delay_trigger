@@ -69,7 +69,11 @@ while [ "$1" != "" ]; do
 			set.site 0 SIG:SYNC_OUT:TRG GPG
 			set.site 0 SIG:SYNC_OUT:TRG:DX d1;;
 		acq1014)
-			echo TODO: route it out the biscuit.. SOFT_TRG d0 on biscuit
+			clkd=0
+			set.site 0 SIG:SRC:TRG:1 GPG1
+			echo "WARNING: setting ADC TRG d1. \
+				Do not let it get cleared.."
+			set.site 1 TRG:DX d1
 			config_gpg 0 $edge;;
 		*)
 # awg from site 1.. enable GPG trigger
