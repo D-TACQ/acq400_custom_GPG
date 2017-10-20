@@ -47,7 +47,7 @@ while [ "$1" != "" ]; do
 			set.site 0 SIG:SYNC_OUT:TRG:DX d7;;
 		acq1014)
 			set.site 0 SIG:SRC:TRG:1 STRIG
-			set.site 0 TRG:DX d0;;
+			set.site 1 TRG:DX d0;;
 		esac; exit;;
 	*)
 		clkd=${CLK#d*}
