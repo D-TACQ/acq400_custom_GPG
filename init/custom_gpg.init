@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo ++ custom_gpg.init
-if [ "$(cat /etc/acq400/0/MODEL)" = "ACQ1014" ]; then
+if [ "$(cat /etc/acq400/0/MODEL)" = "acq1014" ]; then
 	ln -s /usr/local/bin/delay_trigger /etc/acq400/0/acq1014_delay_trigger
 else
 	echo +++ legacy ACQ1014A detected
@@ -27,11 +27,6 @@ fi
 
 inetd /etc/inetd.gpg.conf
 
-echo ++ custom_gpg.init go underground
-(echo ++ custom_gpg.init background wait ioc_ready; \
-	sleep 5; echo ++ custom_gpg.init back from initial sleep; \
-	/usr/local/bin/wait_ioc_ready; \
-	echo ++ custom_gpg.init enable monitor; \
-	/usr/local/epics/scripts/gpg_monitor 1) &
+
 
 
