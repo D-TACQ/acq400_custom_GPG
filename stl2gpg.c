@@ -87,6 +87,8 @@ int main(int argc, char* argv[])
 		}
 		if (aline[0] == '#' || strlen(aline) < 2){
 			continue;
+		}else if (strncmp(aline, "EOF", 3) == 0){
+			fprintf(stderr, "quit on EOF\n");
 		}else if (aline[0] == '+'){
 			pline = aline + 1;
 			delta_times = 1;	/* better make them all delta */
