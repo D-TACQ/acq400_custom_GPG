@@ -14,7 +14,7 @@ echo "none" > /etc/acq400/0/pulse_def
 cat - >/etc/inetd.gpg.conf <<EOF
 4541 stream tcp nowait root stl2gpg stl2gpg /dev/acq400.0.gpg
 4542 stream tcp nowait root cat cat /dev/acq400.0.gpg
-4543 stream tcp nowait root gpg_dump gpg_dump dummy
+4543 stream tcp nowait root gpg_dump gpg_dump /dev/acq400.0.gpg
 EOF
 
 # temp hack for acq1014a REMOVE ME
