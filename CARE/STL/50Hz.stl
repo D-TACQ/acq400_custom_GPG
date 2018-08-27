@@ -1,0 +1,5 @@
+# 50Hz pulse on d0
++10000,1
++10000,0
+EOFLOOP
+

@@ -1,0 +1,5 @@
+# 20Hz pulse on d0
++25000,1
++25000,0
+EOFLOOP
+

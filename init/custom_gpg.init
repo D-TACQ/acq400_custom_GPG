@@ -8,6 +8,7 @@ else
 	ln -s /usr/local/bin/acq1014_delay_trigger /etc/acq400/0/
 fi
 ln -s /usr/local/bin/delay_trigger /etc/acq400/0/
+ln -s /usr/local/CARE/gpg_free_run /etc/acq400/0/
 
 echo "none" > /etc/acq400/0/pulse_def
 

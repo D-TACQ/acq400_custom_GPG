@@ -1,0 +1,5 @@
+# 1Hz pulse on d0, run in loop mode
++500000,1
++500000,0
+EOFLOOP
+

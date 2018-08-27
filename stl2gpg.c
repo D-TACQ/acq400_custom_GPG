@@ -7,11 +7,14 @@ FILE *fp_out;
 
 #define MAXCOUNT 0x00ffffff
 
+#define STARTUP	5	/* minimum count on start + 1 */
+#define MINSTEP	2	/* minimum step size (by experiment) */
+
 void write_gpd(unsigned count, unsigned state)
 {
 	unsigned gpd = (count<<8) | (state&0x0ff);
 
-	fprintf(stderr, "write_gpg %8u %02x %08x\n", count, state, gpd);
+	fprintf(stderr, "write_gpd %8u %02x %08x\n", count, state, gpd);
 
 	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
 }
@@ -22,10 +25,18 @@ long expand_state(unsigned state, long until_count)
 
 	if (until_count < MAXCOUNT){
 		fprintf(stderr, "expand_state() %d\n", __LINE__);
+		if (until_count-count0 < MINSTEP){
+			fprintf(stderr, "ENFORCING MINSTEP %d\n", MINSTEP);
+			until_count = count0 + MINSTEP;
+		}
 		write_gpd(until_count, state);
 	}else{
 		unsigned remain = until_count - count0;
 		unsigned ontheclock = count0&MAXCOUNT;		/* what's already on the clock */
+		if (remain < MINSTEP){
+			fprintf(stderr, "ENFORCING MINSTEP %d\n", MINSTEP);
+			remain = MINSTEP;
+		}
 		if (MAXCOUNT-ontheclock > remain){
 			fprintf(stderr, "expand_state() %d\n", __LINE__);
 			write_gpd(count0+remain, state);
@@ -51,7 +62,8 @@ long expand_state(unsigned state, long until_count)
 #define NSTATE 1
 #define MAXSTATE 128	/* hardware limit */
 
-int FINAL = 10;		/* final state length */
+
+int FINAL = MINSTEP;		/* final state length */
 
 int main(int argc, char* argv[])
 {
@@ -87,27 +99,41 @@ int main(int argc, char* argv[])
 		}
 		if (aline[0] == '#' || strlen(aline) < 2){
 			continue;
-		}else if (strncmp(aline, "EOF", 3) == 0){
+		}else if (strstr(aline, "EOFLOOP")){
+			fprintf(stderr, "quit on EOFLOOP\n");
+			return 0;
+		}else if (strstr(aline, "EOF")){
 			fprintf(stderr, "quit on EOF\n");
+			break;
 		}else if (aline[0] == '+'){
 			pline = aline + 1;
 			delta_times = 1;	/* better make them all delta */
 		}
 		if ((nstate = sscanf(pline, "%u,%x", &count, &state) - 1) >= 1){
-			if (++state_count >= MAXSTATE-1){
+			if (state_count+1 >= MAXSTATE-1){
 				fprintf(stderr, "WARNING: state count limit %u exceeded\n", MAXSTATE);
 				break;
 			}
-			abs_count = expand_state(state0, 
-				delta_times? abs_count+count: count);
-			state_count += 1;
+			if (state_count++ == 0){
+				if (count < STARTUP){
+					fprintf(stderr, "STARTUP min count %d\n", STARTUP);
+					count = STARTUP;
+				}
+				if (delta_times){
+					count -= 1;	/* first count from zero */
+				}
+			}
+			/* abs times: all counts from zero */
+			abs_count = expand_state(state0,
+					delta_times? abs_count+count: count-1);
 			state0 = state;
 		}else{
 			fprintf(stderr, "scan failed\n");
 			return -1;
 		}
 	}
+
 	abs_count = expand_state(state0, 
                                 delta_times? abs_count+FINAL: abs_count+FINAL);
-	
+
 }

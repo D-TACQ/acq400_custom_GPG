@@ -1,0 +1,19 @@
+#!/bin/sh
+# gpg_free_run [STL] .. soft-trigger starts a free run pulse train on d0
+
+STL=${1:-/usr/local/CARE/STL/50Hz.stl}
+
+if [ ! -e $STL ]; then
+	echo ERROR $STL does not exist
+	exit 1
+fi
+set.site 0 GPG:ENABLE 0
+nc localhost 4541 <$STL
+set.site 0 GPG_TRG external
+set.site 0 GPG_TRG:DX d1
+set.site 0 GPG_TRG:SENSE rising
+set.site 0 GPG:MODE LOOP
+set.site 0 SIG:SRC:TRG:0 GPG0
+set.site 0 GPG:ENABLE 1
+echo $(basename $STL) > /etc/acq400/0/pulse_def
+soft_trigger
