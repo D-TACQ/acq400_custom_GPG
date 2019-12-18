@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
+#include <assert.h>
 
 FILE *fp_out;
+FILE *fp_log;
 
 #define MAXCOUNT 0x00ffffff
 
@@ -14,7 +16,7 @@ void write_gpd(unsigned count, unsigned state)
 {
 	unsigned gpd = (count<<8) | (state&0x0ff);
 
-	fprintf(stderr, "write_gpd %8u %02x %08x\n", count, state, gpd);
+	fprintf(fp_log, "write_gpd %8u %02x %08x\n", count, state, gpd);
 
 	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
 }
@@ -24,9 +26,9 @@ long expand_state(unsigned state, long until_count)
 	static unsigned count0;
 
 	if (until_count < MAXCOUNT){
-		fprintf(stderr, "expand_state() %d\n", __LINE__);
+		fprintf(fp_log, "expand_state() %d\n", __LINE__);
 		if (until_count-count0 < MINSTEP){
-			fprintf(stderr, "ENFORCING MINSTEP %d\n", MINSTEP);
+			fprintf(fp_log, "ENFORCING MINSTEP %d\n", MINSTEP);
 			until_count = count0 + MINSTEP;
 		}
 		write_gpd(until_count, state);
@@ -34,23 +36,23 @@ long expand_state(unsigned state, long until_count)
 		unsigned remain = until_count - count0;
 		unsigned ontheclock = count0&MAXCOUNT;		/* what's already on the clock */
 		if (remain < MINSTEP){
-			fprintf(stderr, "ENFORCING MINSTEP %d\n", MINSTEP);
+			fprintf(fp_log, "ENFORCING MINSTEP %d\n", MINSTEP);
 			remain = MINSTEP;
 		}
 		if (MAXCOUNT-ontheclock > remain){
-			fprintf(stderr, "expand_state() %d\n", __LINE__);
+			fprintf(fp_log, "expand_state() %d\n", __LINE__);
 			write_gpd(count0+remain, state);
 		}else{
-			fprintf(stderr, "expand_state() %d\n", __LINE__);
+			fprintf(fp_log, "expand_state() %d\n", __LINE__);
 			write_gpd(MAXCOUNT, state);
 			remain -= (MAXCOUNT+1)-ontheclock;
 			
 			while(remain > MAXCOUNT){
-				fprintf(stderr, "expand_state() %d\n", __LINE__);
+				fprintf(fp_log, "expand_state() %d\n", __LINE__);
 				write_gpd(MAXCOUNT, state);
 				remain -= MAXCOUNT+1;
 			}
-			fprintf(stderr, "expand_state() %d\n", __LINE__);
+			fprintf(fp_log, "expand_state() %d\n", __LINE__);
 			write_gpd(remain, state);
 		}
 	}
@@ -70,14 +72,18 @@ int main(int argc, char* argv[])
 	char aline[128];
 	int delta_times = 0;
 	long abs_count = 0;
-	FILE *fp_log = 0;
 	int nstate = 0;
 	int nl = 0;
 	int state_count = 0;
 	unsigned state0 = 0;
 
 	if (getenv("FINAL")) FINAL = atoi(getenv("FINAL"));
-
+	if (getenv("STL2GPG_LOG")){
+		fp_log = fopen(getenv("STL2GPG_LOG"), "w");
+		assert(fp_log);
+	}else{
+		fp_log = stderr;
+	}
 	if (argc > 1){
 		fp_out = fopen(argv[1], "w");
 		if (fp_out == 0){
@@ -109,6 +115,7 @@ int main(int argc, char* argv[])
 			pline = aline + 1;
 			delta_times = 1;	/* better make them all delta */
 		}
+		/* scan two numbers. IGNORE any trailing data same line */
 		if ((nstate = sscanf(pline, "%u,%x", &count, &state) - 1) >= 1){
 			if (state_count+1 >= MAXSTATE-1){
 				fprintf(stderr, "WARNING: state count limit %u exceeded\n", MAXSTATE);
@@ -136,4 +143,6 @@ int main(int argc, char* argv[])
 	abs_count = expand_state(state0, 
                                 delta_times? abs_count+FINAL: abs_count+FINAL);
 
+	fprintf(stderr, "return 0\n");
+	return 0;
 }
