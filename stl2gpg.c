@@ -67,6 +67,11 @@ long expand_state(unsigned state, long until_count)
 
 int FINAL = MINSTEP;		/* final state length */
 
+void prompt(int state_count){
+	printf("%d ok>\n", state_count);
+	fflush(stdout);
+}
+
 int main(int argc, char* argv[])
 {
 	char aline[128];
@@ -95,7 +100,7 @@ int main(int argc, char* argv[])
 	}else{
 		fp_out = stdout;
 	}
-	while(fgets(aline, 128, stdin) && ++nl){
+	for (; fgets(aline, 128, stdin) && ++nl; prompt(state_count)){
 		unsigned count;
 		unsigned state;
 		char* pline = aline;
