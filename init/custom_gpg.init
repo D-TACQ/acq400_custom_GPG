@@ -37,6 +37,7 @@ source /etc/sites
 for s in $(echo $vg_sites | tr , \  ); do
 	if [ "$(cat /dev/acq400.$s.knobs/module_type)" = "6B" ] && \
 		[ -e /dev/acq400.$s.knobs/gpg_enable ] ; then
+		echo "none" > /etc/acq400/$s/pulse_def
 		add_pg_service $s
 	fi
 done
