@@ -6,6 +6,7 @@
 
 FILE *fp_out;
 FILE *fp_log;
+FILE* fp_state;
 
 #define MAXCOUNT 0x00ffffff
 
@@ -19,6 +20,9 @@ void write_gpd(unsigned count, unsigned state)
 	fprintf(fp_log, "write_gpd %8u %02x %08x\n", count, state, gpd);
 
 	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
+	if (fp_state){
+		fwrite(&state, sizeof(unsigned), 1, fp_state);
+	}
 }
 
 long expand_state(unsigned state, long until_count)
@@ -94,6 +98,13 @@ int main(int argc, char* argv[])
 		if (fp_out == 0){
 			perror("failed to open outfile");
 			return -1;
+		}
+		if (argc > 2){
+			fp_state = fopen(argv[2], "w");
+			if (fp_out == 0){
+				perror("failed to open state file");
+				return -1;
+			}
 		}
 		snprintf(aline, 128, "/tmp/%s", basename(argv[1]));
 		fp_log = fopen(aline, "w");

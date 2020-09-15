@@ -18,9 +18,9 @@ EOF
 add_pg_service() {
 echo "add_pg_service $1"
 cat - >>/etc/inetd.gpg.conf <<EOF
-450${1}1 stream tcp nowait root stl2gpg stl2gpg  /dev/acq400.${1}.gpg
-450${1}2 stream tcp nowait root cat cat /dev/acq400.${1}.gpg
-450${1}3 stream tcp nowait root gpg_dump gpg_dump /dev/acq400.${1}.gpg
+450${1}1 stream tcp nowait root stl2gpg stl2gpg  $2 $3
+450${1}2 stream tcp nowait root cat cat $2
+450${1}3 stream tcp nowait root gpg_dump gpg_dump $2
 EOF
 }
 
@@ -46,7 +46,12 @@ source /etc/sites
 for s in $(echo $vg_sites | tr , \  ); do
 	if [ "$(is_pg $s)" = "y" ] && [ -e /dev/acq400.$s.knobs/gpg_enable ] ; then
 		echo "none" > /etc/acq400/$s/pulse_def
-		add_pg_service $s
+		if [ "$(cat /dev/acq400.$s.knobs/module_type)" = "6B" ]; then
+			S32=/dev/acq400.${s}.gpg32
+		else
+			S32=""
+		fi
+		add_pg_service $s /dev/acq400.${s}.gpg $S32
 	fi
 done
 inetd /etc/inetd.gpg.conf

@@ -1,4 +1,6 @@
 
+SITE=${SITE:-0}
+DEV=/dev/acq400.$SITE.gpg
 DEV=${1:-/dev/acq400.0.gpg}
 
 if [ "x$DEV" = "x-" ]; then
