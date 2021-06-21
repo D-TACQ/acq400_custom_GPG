@@ -1,8 +1,9 @@
 #!/bin/sh
 # delay_trigger usec or
-# delay_trigger CLK=clksrc nclocks
+# delay_trigger [CLK=clksrc] [TRG=trgsrc] nclocks
 # eg delay_trigger 1000000
 # eg delay_trigger CLK=0 1000000
+# eg delay_trigger TRG=5 EDGE=rising CLK=1  100000
 # multi-trigger : 
 # delay_trigger preload or 
 # delay_trigger STL=stl-file load
@@ -51,9 +52,10 @@ while [ "$1" != "" ]; do
 		esac; exit;;
 	*)
 		clkd=${CLK#d*}
-		if [ "x$clkd" = "x" ]; then
-			clkd=int
-		fi
+		[ "x$clkd" = "x" ] && clkd=int
+		trgd=${TRG#d*}
+		[ "x$trgd" = "x" ] && trgx=0
+
 		if [ "x$EDGE" = "xfalling" ]; then
 			edge=0
 		else
@@ -81,7 +83,7 @@ while [ "$1" != "" ]; do
 		*)
 # awg from site 1.. enable GPG trigger
 			set.site 0 SIG:SRC:TRG:1 GPG1
-			config_gpg 0 $edge;;
+			config_gpg $trgd $edge;;
 		esac
 		if [ "x$clkd" = "xint" ]; then
 			set.site 0 gpg_clk=0,0,0
