@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	int nl = 0;
 	int state_count = 0;
 	unsigned state0 = 0;
-	int count_scale = 1;
+	int cscale = 1;
 
 
 	if (getenv("FINAL")) FINAL = atoi(getenv("FINAL"));
@@ -95,8 +95,8 @@ int main(int argc, char* argv[])
 	}else{
 		fp_log = stderr;
 	}
-	if (getenv("GPG_COUNT_SCALE")){
-		count_scale = atoi(getenv("GPG_COUNT_SCALE"));
+	if (getenv("CSCALE")){
+		cscale = atoi(getenv("CSCALE"));
 	}
 	if (argc > 1){
 		fp_out = fopen(argv[1], "w");
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 		}
 		/* scan two numbers. IGNORE any trailing data same line */
 		if ((nstate = sscanf(pline, "%u,%x", &count, &state) - 1) >= 1){
-			count *= count_scale;
+			count *= cscale;
 			if (state_count+1 >= MAXSTATE-1){
 				fprintf(stderr, "WARNING: state count limit %u exceeded\n", MAXSTATE);
 				break;
