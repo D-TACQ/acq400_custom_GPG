@@ -3,6 +3,7 @@
 #include <string.h>
 #include <libgen.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "../../ACQ420FMC/popt.h"
 
@@ -81,7 +82,7 @@ void prompt(int state_count){
 char* cscale_def = 0;
 
 struct poptOption opt_table[] = {
-	{ "cscale", 'c', POPT_ARG_STRING, &cscale_def, 0, "cscale on the command line" },
+	{ "cscale", 'c', POPT_ARG_STRING, &cscale_def, 'c', "cscale on the command line" },
 	POPT_AUTOHELP
 	POPT_TABLEEND
 };
@@ -116,7 +117,22 @@ int main(int argc, const char** argv)
         int rc;
         while ( (rc = poptGetNextOpt( opt_context )) >= 0 ){
                 switch(rc){
-                case 's':
+                case 'c':
+			if (isdigit(cscale_def[0])){
+				cscale = atoi(cscale_def);
+			}else{
+				FILE* fp = fopen(cscale_def, "r");
+				if (fp){
+					int nc = fscanf(fp, "%d", &cscale);
+					if (nc != 0){
+						fprintf(stderr, "ERROR %s scan failed\n", cscale_def);
+						exit(1);
+					}
+				}else{
+					perror(cscale_def);
+					exit(1);
+				}
+			}
                         break;
                 }
         }
