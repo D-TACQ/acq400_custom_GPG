@@ -19,7 +19,7 @@ add_pg_service() {
 echo "add_pg_service $1"
 # hw knob was NFG, use a soft knob
 tscaler=/etc/acq400/$1/gpg_timescaler
-[ -l $tscaler ] && rm $tscaler
+[ -L $tscaler ] && rm $tscaler
 [ -e $tscaler ] || echo 1 > $tscaler
 cat - >>/etc/inetd.gpg.conf <<EOF
 450${1}1 stream tcp nowait root stl2gpg stl2gpg --cscale=$tscaler $2 $3
