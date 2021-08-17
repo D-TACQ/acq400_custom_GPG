@@ -4,6 +4,8 @@
 #include <libgen.h>
 #include <assert.h>
 
+#include "../../ACQ420FMC/popt.h"
+
 FILE *fp_out;
 FILE *fp_log;
 FILE* fp_state;
@@ -76,7 +78,16 @@ void prompt(int state_count){
 	fflush(stdout);
 }
 
-int main(int argc, char* argv[])
+char* cscale_def = 0;
+
+struct poptOption opt_table[] = {
+	{ "cscale", 'c', POPT_ARG_STRING, &cscale_def, 0, "cscale on the command line" },
+	POPT_AUTOHELP
+	POPT_TABLEEND
+};
+
+
+int main(int argc, const char** argv)
 {
 	char aline[128];
 	int delta_times = 0;
@@ -86,6 +97,8 @@ int main(int argc, char* argv[])
 	int state_count = 0;
 	unsigned state0 = 0;
 	int cscale = 1;
+	const char* arg1;
+	const char* arg2;
 
 
 	if (getenv("FINAL")) FINAL = atoi(getenv("FINAL"));
@@ -98,21 +111,37 @@ int main(int argc, char* argv[])
 	if (getenv("CSCALE")){
 		cscale = atoi(getenv("CSCALE"));
 	}
-	if (argc > 1){
-		fp_out = fopen(argv[1], "w");
+        poptContext opt_context =
+                        poptGetContext(argv[0], argc, argv, opt_table, 0);
+        int rc;
+        while ( (rc = poptGetNextOpt( opt_context )) >= 0 ){
+                switch(rc){
+                case 's':
+                        break;
+                }
+        }
+
+        arg1 = poptGetArg(opt_context);
+	if (arg1){
+		char* outfile = strdup(arg1);
+		fp_out = fopen(outfile, "w");
 		if (fp_out == 0){
 			perror("failed to open outfile");
 			return -1;
 		}
-		if (argc > 2){
-			fp_state = fopen(argv[2], "w");
+		arg2 = poptGetArg(opt_context);
+		if (arg2){
+			char* statefile = strdup(arg2);
+			fp_state = fopen(statefile, "w");
 			if (fp_out == 0){
 				perror("failed to open state file");
 				return -1;
 			}
+			free(statefile);
 		}
-		snprintf(aline, 128, "/tmp/%s", basename(argv[1]));
+		snprintf(aline, 128, "/tmp/%s", basename(outfile));
 		fp_log = fopen(aline, "w");
+		free(outfile);
 	}else{
 		fp_out = stdout;
 	}
