@@ -124,7 +124,7 @@ int main(int argc, const char** argv)
 				FILE* fp = fopen(cscale_def, "r");
 				if (fp){
 					int nc = fscanf(fp, "%d", &cscale);
-					if (nc != 0){
+					if (nc != 1){
 						fprintf(stderr, "ERROR %s scan failed\n", cscale_def);
 						exit(1);
 					}
