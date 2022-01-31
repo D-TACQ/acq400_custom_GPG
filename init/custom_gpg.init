@@ -9,8 +9,9 @@ ln -s /usr/local/CARE/gpg_free_run /etc/acq400/0/
 
 echo "none" > /etc/acq400/0/pulse_def
 
+tscaler=/etc/acq400/0/gpg_timescaler; [ -e $tscaler ] || echo 1 > $tscaler
 cat - >/etc/inetd.gpg.conf <<EOF
-4541 stream tcp nowait root stl2gpg stl2gpg /dev/acq400.0.gpg
+4541 stream tcp nowait root stl2gpg stl2gpg --cscale=$tscaler /dev/acq400.0.gpg
 4542 stream tcp nowait root cat cat /dev/acq400.0.gpg
 4543 stream tcp nowait root gpg_dump gpg_dump /dev/acq400.0.gpg
 EOF
