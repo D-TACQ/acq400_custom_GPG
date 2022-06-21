@@ -4,10 +4,12 @@
 #include <libgen.h>
 #include <assert.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #include "../../ACQ420FMC/popt.h"
 
 FILE *fp_out;
+FILE *fp_out32;
 FILE *fp_log;
 FILE* fp_state;
 
@@ -23,6 +25,10 @@ void write_gpd(unsigned count, unsigned state)
 	fprintf(fp_log, "write_gpd %8u %02x %08x\n", count, state, gpd);
 
 	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
+	if (fp_out32){
+		unsigned state2 = state >> 8;
+		fwrite(&state2, sizeof(unsigned), 1, fp_out32);
+	}
 	if (fp_state){
 		fwrite(&state, sizeof(unsigned), 1, fp_state);
 	}
@@ -88,6 +94,22 @@ struct poptOption opt_table[] = {
 };
 
 
+int check_gpg32(const char* outfile)
+{
+	char f32[80];
+	snprintf(f32, 80, "%s32", outfile);
+
+	if (access(outfile, F_OK) == 0 && access(f32, F_OK) == 0){
+		fp_out32 = fopen(f32, "w");
+                if (fp_out32 == 0){
+                        perror("failed to open gpg32");
+                        return -1;
+                }
+	}
+
+	return 0;
+}
+
 int main(int argc, const char** argv)
 {
 	char aline[128];
@@ -143,6 +165,9 @@ int main(int argc, const char** argv)
 		fp_out = fopen(outfile, "w");
 		if (fp_out == 0){
 			perror("failed to open outfile");
+			return -1;
+		}
+		if (check_gpg32(outfile) == -1){
 			return -1;
 		}
 		arg2 = poptGetArg(opt_context);
