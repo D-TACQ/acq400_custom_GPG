@@ -1,10 +1,22 @@
-
-DEV=${1:-/dev/acq400.0.gpg}
-
+#!/bin/sh
+SITE=${SITE:-0}
+SITE=${1:-$SITE}
 if [ "x$DEV" = "x-" ]; then
 	DEV=
+elif [ -e $1 ]; then
+	DEV=$1
+else 
+	DEV=/dev/acq400.${SITE}.gpg
 fi
 
-hexdump -e '1/4 "%d\n"' $DEV | 
-awk '{state=and($1,255);count=rshift($1,8); printf "%8u %02x\n", count, state; state=3333 }'
+if [ ! -e ${DEV}32 ]; then
+	hexdump -e '1/4 "%d\n"' $DEV | 
+	awk '{state=and($1,255);count=rshift($1,8); 
+		printf "%8u %02x\n", count, state; state=3333 }'
+else
+	echo gpg32 exists..
+	paste <(hexdump -e '1/4 "%d\n"' $DEV) <(hexdump -e '1/4 "%d\n"' ${DEV}32) |
+		awk '{state=and($1,255);count=rshift($1,8); st32=$2
+                printf "%8u %06x%02x\n", count, st32, state; state=3333 }'
+fi
 
