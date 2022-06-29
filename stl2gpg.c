@@ -22,12 +22,13 @@ void write_gpd(unsigned count, unsigned state)
 {
 	unsigned gpd = (count<<8) | (state&0x0ff);
 
-	fprintf(fp_log, "write_gpd %8u %02x %08x\n", count, state, gpd);
-
 	fwrite(&gpd, sizeof(unsigned), 1, fp_out);
 	if (fp_out32){
 		unsigned state2 = state >> 8;
 		fwrite(&state2, sizeof(unsigned), 1, fp_out32);
+		fprintf(fp_log, "write_gpd %8u %08x %06x:%02x %08x\n", count, state, state2, state&0x0ff, gpd);
+	}else{
+		fprintf(fp_log, "write_gpd %8u %02x %08x\n", count, state, gpd);
 	}
 	if (fp_state){
 		fwrite(&state, sizeof(unsigned), 1, fp_state);
