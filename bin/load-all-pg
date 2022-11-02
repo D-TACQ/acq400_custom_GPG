@@ -1,9 +1,11 @@
+#!/bin/sh
+
 mode=${1:-0}
 cscale=${2:-1}
 stim_file=${3:-""}
 TRG=${TRG:-1,0,1}    
 
-if [ "x$1" -eq "xhelp" ]; then
+if [ "x$1" = "xhelp" ]; then
 cat - <<EOF
 
 Not enough input arguments!
