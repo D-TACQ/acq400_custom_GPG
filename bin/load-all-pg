@@ -3,12 +3,19 @@ cscale=${2:-1}
 stim_file=${3:-""}
 
 if [ "$#" -lt 2 ]; then
-	echo -e "\nNot enough input arguments!\n"
-	echo "e.g. ./load-all-pg mode scale [stim_file]"
-	echo -e "\nwhere\tmode : 0=Once, 2=Loop, 3=LoopWait\n\tscale : scaling factor"
-	echo -e "\toptional stim_file : path to STL file"
-	echo -e "\n./load-all-pg 3 10000 /mnt/local/patterns/going_to_church\n\n"
-	exit
+cat - <<EOF
+
+Not enough input arguments!
+
+e.g. ./load-all-pg mode scale [stim_file]
+where	mode : 0=Once, 2=Loop, 3=LoopWait
+	tscale : scaling factor
+	optional stim_file : path to STL file
+example
+	load-all-pg 3 10000 /usr/local/CARE/STL/going_to_church
+
+EOF
+exit 1
 fi
 
 for sx in $(get.site 0 SITELIST | tr , \  ) # Find all PG sites
