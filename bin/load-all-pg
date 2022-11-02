@@ -34,7 +34,8 @@ Loop)
 LoopWait)
 	mode=3;;
 *)
-	echo "ERROR invalid mode must be 0,2,3 or Once,Loop,Loopwait";;
+	echo "ERROR invalid mode must be 0,2,3 or Once,Loop,Loopwait"
+	exit 1;;
 esac
 
 for sx in $(get.site 0 SITELIST | tr , \  ) # Find all PG sites
