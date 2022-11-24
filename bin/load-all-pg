@@ -41,7 +41,7 @@ esac
 for sx in $(get.site 0 SITELIST | tr , \  ) # Find all PG sites
 do 
 	DS=${sx%=dio}
-	if [ "$DS" != "$sx" ]; then
+	if [ "$DS" != "$sx" ] && [ -e /etc/acq400/${DS}/num_pg ]; then
 		set.site $DS trg $TRG
 		CSCALE=$cscale SITE=$DS /usr/local/CARE/pg_test $mode $stim_file
 	fi
