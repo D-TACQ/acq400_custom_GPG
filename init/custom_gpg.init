@@ -9,7 +9,15 @@ ln -s /usr/local/CARE/gpg_free_run /etc/acq400/0/
 
 echo "none" > /etc/acq400/0/pulse_def
 
-tscaler=/etc/acq400/0/gpg_timescaler; [ -e $tscaler ] || echo 1 > $tscaler
+
+create_tscaler() {
+# hw knob was NFG, use a soft knob
+	tscaler=/etc/acq400/$1/gpg_timescaler 
+	[ -L $tscaler ] && rm $tscaler
+	[ -e $tscaler ] || echo 1 > $tscaler
+}
+
+create_tscaler 0
 cat - >/etc/inetd.gpg.conf <<EOF
 4541 stream tcp nowait root stl2gpg stl2gpg --cscale=$tscaler /dev/acq400.0.gpg
 4542 stream tcp nowait root cat cat /dev/acq400.0.gpg
@@ -18,10 +26,7 @@ EOF
 
 add_pg_service() {
 echo "add_pg_service $1"
-# hw knob was NFG, use a soft knob
-tscaler=/etc/acq400/$1/gpg_timescaler
-[ -L $tscaler ] && rm $tscaler
-[ -e $tscaler ] || echo 1 > $tscaler
+create_tscaler $1
 cat - >>/etc/inetd.gpg.conf <<EOF
 450${1}1 stream tcp nowait root stl2gpg stl2gpg --cscale=$tscaler $2 $3
 450${1}2 stream tcp nowait root cat cat $2
