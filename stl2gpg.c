@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#include "../../ACQ420FMC/popt.h"
+#include "popt.h"
 
 FILE *fp_out;
 FILE *fp_out32;
