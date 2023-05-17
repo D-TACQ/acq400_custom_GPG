@@ -76,7 +76,7 @@ long expand_state(unsigned state, long until_count)
 }
 
 #define NSTATE 1
-#define MAXSTATE 1024	/* hardware limit */
+#define MAXSTATE 512	/* hardware limit */
 
 
 int FINAL = MINSTEP;		/* final state length */
