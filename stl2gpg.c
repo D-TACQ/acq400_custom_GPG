@@ -18,7 +18,7 @@ FILE* fp_state;
 #define STARTUP	5	/* minimum count on start + 1 */
 #define MINSTEP	2	/* minimum step size (by experiment) */
 
-void write_gpd(unsigned count, unsigned state)
+void write_gpd(unsigned count, unsigned state, int line)
 {
 	unsigned gpd = (count<<8) | (state&0x0ff);
 
@@ -26,9 +26,10 @@ void write_gpd(unsigned count, unsigned state)
 	if (fp_out32){
 		unsigned state2 = state >> 8;
 		fwrite(&state2, sizeof(unsigned), 1, fp_out32);
-		fprintf(fp_log, "write_gpd %8u %08x %06x:%02x %08x\n", count, state, state2, state&0x0ff, gpd);
+		fprintf(fp_log, "write_gpd %3d: %8u %08x %06x:%02x %08x\n", 
+					line, count, state, state2, state&0x0ff, gpd);
 	}else{
-		fprintf(fp_log, "write_gpd %8u %02x %08x\n", count, state, gpd);
+		fprintf(fp_log, "write_gpd %3d: %8u %02x %08x\n", line, count, state, gpd);
 	}
 	if (fp_state){
 		fwrite(&state, sizeof(unsigned), 1, fp_state);
@@ -38,6 +39,9 @@ void write_gpd(unsigned count, unsigned state)
 long expand_state(unsigned state, long until_count)
 {
 	static unsigned count0;
+	static int line;
+
+	line += 1;
 
 	if (until_count < MAXCOUNT){
 		fprintf(fp_log, "expand_state() %d\n", __LINE__);
@@ -45,7 +49,7 @@ long expand_state(unsigned state, long until_count)
 			fprintf(fp_log, "ENFORCING MINSTEP %d\n", MINSTEP);
 			until_count = count0 + MINSTEP;
 		}
-		write_gpd(until_count, state);
+		write_gpd(until_count, state, line);
 	}else{
 		unsigned remain = until_count - count0;
 		unsigned ontheclock = count0&MAXCOUNT;		/* what's already on the clock */
@@ -55,19 +59,19 @@ long expand_state(unsigned state, long until_count)
 		}
 		if (MAXCOUNT-ontheclock > remain){
 			fprintf(fp_log, "expand_state() %d\n", __LINE__);
-			write_gpd(count0+remain, state);
+			write_gpd(count0+remain, state, line);
 		}else{
 			fprintf(fp_log, "expand_state() %d\n", __LINE__);
-			write_gpd(MAXCOUNT, state);
+			write_gpd(MAXCOUNT, state, line);
 			remain -= (MAXCOUNT+1)-ontheclock;
 			
 			while(remain > MAXCOUNT){
 				fprintf(fp_log, "expand_state() %d\n", __LINE__);
-				write_gpd(MAXCOUNT, state);
+				write_gpd(MAXCOUNT, state, line);
 				remain -= MAXCOUNT+1;
 			}
 			fprintf(fp_log, "expand_state() %d\n", __LINE__);
-			write_gpd(remain, state);
+			write_gpd(remain, state, line);
 		}
 	}
 
