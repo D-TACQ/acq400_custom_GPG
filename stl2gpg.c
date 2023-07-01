@@ -111,6 +111,18 @@ int check_gpg32(const char* outfile)
 	return 0;
 }
 
+// https://stackoverflow.com/questions/744766/how-to-compare-ends-of-strings-in-c
+int EndsWith(const char *str, const char *suffix)
+{
+    if (!str || !suffix)
+        return 0;
+    size_t lenstr = strlen(str);
+    size_t lensuffix = strlen(suffix);
+    if (lensuffix >  lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
+
 int main(int argc, const char** argv)
 {
 	char aline[128];
@@ -163,26 +175,31 @@ int main(int argc, const char** argv)
         arg1 = poptGetArg(opt_context);
 	if (arg1){
 		char* outfile = strdup(arg1);
-		fp_out = fopen(outfile, "w");
-		if (fp_out == 0){
-			perror("failed to open outfile");
+		if (EndsWith(outfile, ".stl")){
+			fprintf(stderr, "refusing to overwrite file %s\n", outfile);
 			return -1;
-		}
-		if (check_gpg32(outfile) == -1){
-			return -1;
-		}
-		arg2 = poptGetArg(opt_context);
-		if (arg2){
-			char* statefile = strdup(arg2);
-			fp_state = fopen(statefile, "w");
+		}else{
+			fp_out = fopen(outfile, "w");
 			if (fp_out == 0){
-				perror("failed to open state file");
+				perror("failed to open outfile");
 				return -1;
 			}
-			free(statefile);
+			if (check_gpg32(outfile) == -1){
+				return -1;
+			}
+			arg2 = poptGetArg(opt_context);
+			if (arg2){
+				char* statefile = strdup(arg2);
+				fp_state = fopen(statefile, "w");
+				if (fp_out == 0){
+					perror("failed to open state file");
+					return -1;
+				}
+				free(statefile);
+			}
+			snprintf(aline, 128, "/tmp/%s", basename(outfile));
+			fp_log = fopen(aline, "w");
 		}
-		snprintf(aline, 128, "/tmp/%s", basename(outfile));
-		fp_log = fopen(aline, "w");
 		free(outfile);
 	}else{
 		fp_out = stdout;

@@ -1,4 +1,7 @@
-all: 
+
+# ./make.zynq makes bin/stl2gpg directly
+#
+all: stl2gpg.x86
 	echo Hello
 
 clean:
@@ -11,7 +14,7 @@ bin/stl2gpg: stl2gpg.c
 
 
 stl2gpg.x86: stl2gpg.c
-	cc stl2gpg.c -o stl2gpg.x86
+	cc stl2gpg.c -o stl2gpg.x86 -lpopt
 
 
 	
