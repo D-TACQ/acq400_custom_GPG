@@ -236,18 +236,21 @@ int main(int argc, const char** argv)
 				break;
 			}
 			if (state_count++ == 0){
-				if (count < STARTUP){
-					fprintf(stderr, "STARTUP min count %d\n", STARTUP);
-					count = STARTUP;
+				state0 = state;			/* do nothing, but set state0 */
+			}else{
+				if (state_count++ == 1){
+					if (count < STARTUP){
+						fprintf(stderr, "STARTUP min count %d\n", STARTUP);
+						count = STARTUP;
+					}else if (delta_times){
+						count -= 1;	/* first count from zero */
+					}
 				}
-				if (delta_times){
-					count -= 1;	/* first count from zero */
-				}
-			}
-			/* abs times: all counts from zero */
-			abs_count = expand_state(state0,
+				/* abs times: all counts from zero */
+				abs_count = expand_state(state0,
 					delta_times? abs_count+count: count-1);
-			state0 = state;
+				state0 = state;
+			}
 		}else{
 			fprintf(stderr, "scan failed\n");
 			return -1;
