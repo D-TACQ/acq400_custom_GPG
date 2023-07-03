@@ -18,6 +18,9 @@ FILE* fp_state;
 #define STARTUP	5	/* minimum count on start + 1 */
 #define MINSTEP	2	/* minimum step size (by experiment) */
 
+#define NSTATE 1
+#define MAXSTATE 512	/* hardware limit */
+
 void write_gpd(unsigned count, unsigned state, int line)
 {
 	unsigned gpd = (count<<8) | (state&0x0ff);
@@ -79,8 +82,6 @@ long expand_state(unsigned state, long until_count)
 	return until_count;
 }
 
-#define NSTATE 1
-#define MAXSTATE 512	/* hardware limit */
 
 
 int FINAL = MINSTEP;		/* final state length */
@@ -139,6 +140,8 @@ int main(int argc, const char** argv)
 	int cscale = 1;
 	const char* arg1;
 	const char* arg2;
+	unsigned* input_counts = calloc(MAXSTATE, sizeof(unsigned));
+	unsigned* input_states = calloc(MAXSTATE, sizeof(unsigned));
 
 
 	if (getenv("FINAL")) FINAL = atoi(getenv("FINAL"));
@@ -219,8 +222,12 @@ int main(int argc, const char** argv)
 		if (aline[0] == '#' || strlen(aline) < 2){
 			continue;
 		}else if (strstr(aline, "EOFLOOP")){
+			state_count++;
+			abs_count = expand_state(state0,
+                                delta_times? abs_count+count: count);
+
 			fprintf(stderr, "quit on EOFLOOP\n");
-			return 0;
+			break;
 		}else if (strstr(aline, "EOF")){
 			fprintf(stderr, "quit on EOF\n");
 			break;
@@ -235,6 +242,9 @@ int main(int argc, const char** argv)
 				fprintf(stderr, "WARNING: state count limit %u exceeded\n", MAXSTATE);
 				break;
 			}
+			input_counts[state_count] = count;
+			input_states[state_count] = state;
+
 			if (state_count++ == 0){
 				state0 = state;			/* do nothing, but set state0 */
 			}else{
@@ -257,8 +267,11 @@ int main(int argc, const char** argv)
 		}
 	}
 
-	abs_count = expand_state(state0, 
+	if (state_count < 3){
+		fprintf(stderr, "state_count < 3 add entry\n");
+		abs_count = expand_state(input_states[0], 
                                 delta_times? abs_count+FINAL: abs_count+FINAL);
+	}
 
 	fprintf(stderr, "return 0\n");
 	return 0;
