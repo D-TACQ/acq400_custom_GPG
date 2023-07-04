@@ -142,6 +142,8 @@ int main(int argc, const char** argv)
 	const char* arg2;
 	unsigned* input_counts = calloc(MAXSTATE, sizeof(unsigned));
 	unsigned* input_states = calloc(MAXSTATE, sizeof(unsigned));
+	unsigned count;
+	unsigned state;
 
 
 	if (getenv("FINAL")) FINAL = atoi(getenv("FINAL"));
@@ -212,8 +214,6 @@ int main(int argc, const char** argv)
 		fp_out = stdout;
 	}
 	for (; fgets(aline, 128, stdin) && ++nl; prompt(state_count)){
-		unsigned count;
-		unsigned state;
 		char* pline = aline;
 
 		if (fp_log) {
@@ -222,11 +222,6 @@ int main(int argc, const char** argv)
 		if (aline[0] == '#' || strlen(aline) < 2){
 			continue;
 		}else if (strstr(aline, "EOFLOOP")){
-			state_count++;
-			abs_count = expand_state(state0,
-                                delta_times? abs_count+count: count);
-
-			fprintf(stderr, "quit on EOFLOOP\n");
 			break;
 		}else if (strstr(aline, "EOF")){
 			fprintf(stderr, "quit on EOF\n");
@@ -266,6 +261,8 @@ int main(int argc, const char** argv)
 			return -1;
 		}
 	}
+
+        abs_count = expand_state(state0, delta_times? abs_count+count: count);
 
 	if (state_count < 3){
 		fprintf(stderr, "state_count < 3 add entry\n");

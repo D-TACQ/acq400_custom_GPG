@@ -1,0 +1,12 @@
+#!/bin/sh
+
+gpg_test() {
+	outfile=gpg1
+	./stl2gpg.x86 $outfile < $1
+	hexdump -ve '1/4 "%08x\n"' $outfile
+}
+
+
+for file in $*; do
+	[ -e $file ] && gpg_test $file
+done
