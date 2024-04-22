@@ -128,6 +128,28 @@ int EndsWith(const char *str, const char *suffix)
     return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
 
+int read_cscale_def(void)
+/* we have to defer the read until the first data arrives, because this program is likely launched ahead of time */
+{
+	int cscale = 1;
+
+	if (isdigit(cscale_def[0])){
+        	cscale = atoi(cscale_def);
+        }else{
+                FILE* fp = fopen(cscale_def, "r");
+        	if (fp){
+                	int nc = fscanf(fp, "%d", &cscale);
+                        if (nc != 1){
+                        	fprintf(stderr, "ERROR %s scan failed\n", cscale_def);
+                                exit(1);
+                        }
+                }else{
+                	perror(cscale_def);
+                        exit(1);
+                }
+	}
+	return cscale;
+}
 int main(int argc, const char** argv)
 {
 	char aline[128];
@@ -162,21 +184,7 @@ int main(int argc, const char** argv)
         while ( (rc = poptGetNextOpt( opt_context )) >= 0 ){
                 switch(rc){
                 case 'c':
-			if (isdigit(cscale_def[0])){
-				cscale = atoi(cscale_def);
-			}else{
-				FILE* fp = fopen(cscale_def, "r");
-				if (fp){
-					int nc = fscanf(fp, "%d", &cscale);
-					if (nc != 1){
-						fprintf(stderr, "ERROR %s scan failed\n", cscale_def);
-						exit(1);
-					}
-				}else{
-					perror(cscale_def);
-					exit(1);
-				}
-			}
+			cscale = read_cscale_def();
                         break;
                 }
         }
@@ -216,6 +224,9 @@ int main(int argc, const char** argv)
 	for (; fgets(aline, 128, stdin) && ++nl; prompt(state_count)){
 		char* pline = aline;
 
+		if (nl == 1){
+			cscale = read_cscale_def();
+		}
 		if (fp_log) {
 			fputs(aline, fp_log);
 		}
