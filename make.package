@@ -5,6 +5,7 @@ SEQ=35
 PKG=custom_gpg
 PACKAGES=../../PACKAGES
 
+set -e
 ./make.zynq	
 
 rm -Rf opkg/*
